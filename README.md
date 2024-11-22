@@ -17,7 +17,7 @@ Building a `cofidectl-debug-container` binary requires:
 To run the unit tests and build the `cofidectl-debug-container` binary:
 
 ```sh
-just build
+just build-release
 ```
 
 ## How it works
