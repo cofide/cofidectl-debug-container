@@ -15,7 +15,7 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 )
 
-const spiffeSocket = "unix:///tmp/spire.sock"
+const spiffeSocket = "unix:///spiffe-workload-api/spire-agent.sock"
 
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
