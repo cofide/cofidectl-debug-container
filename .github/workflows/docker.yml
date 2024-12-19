@@ -1,0 +1,44 @@
+name: docker-image
+on:
+  push:
+    branches:
+      - main
+  release:
+    
+jobs:
+  build-test:
+    name: build
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Create Kind Cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: kind
+      - name: Install ko
+        uses: ko-build/setup-ko@v0.6
+        env:
+          KO_DOCKER_REPO: kind.local
+      - name: Install dependencies
+        run: |
+          go mod download
+      - name: Set KO_TAG to the current commit
+        run: echo "KO_TAG=$(git rev-parse HEAD)" >> $GITHUB_ENV
+      - name: Set KO_TAG to version if it is a release
+        if: github.event_name == 'release'
+        run: echo "KO_TAG=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_ENV
+      - name: Run a ko build
+        run: just build-release
+        env:
+          KO_DOCKER_REPO: ghcr.io/cofide/cofidectl-debug-container/cmd
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

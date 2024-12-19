@@ -10,13 +10,14 @@ Building a `cofidectl-debug-container` binary requires:
 
 * [Go 1.22 toolchain](https://golang.org/doc/install)
 * [`just`](https://github.com/casey/just) as a command runner
+* [`ko`](https://github.com/ko-build/ko) to build container images
 
 ## Build
 
 To run the unit tests and build the `cofidectl-debug-container` binary:
 
 ```sh
-just build
+just build-release
 ```
 
 ## How it works
