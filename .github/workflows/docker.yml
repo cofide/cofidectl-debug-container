@@ -2,7 +2,7 @@ name: docker-image
 on:
   push:
     branches:
-      - main
+      - feat-remove-cmd-suffix
   # release:
     
 jobs:
