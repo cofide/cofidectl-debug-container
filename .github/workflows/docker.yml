@@ -2,8 +2,8 @@ name: docker-image
 on:
   push:
     branches:
-      - feat-remove-cmd-suffix
-  # release:
+      - main
+  release:
     
 jobs:
   build-test:
@@ -35,7 +35,7 @@ jobs:
       - name: Set KO_TAG to the current commit
         run: echo "KO_TAG=$(git rev-parse HEAD)" >> $GITHUB_ENV
       - name: Set KO_TAG to version if it is a release
-        # if: github.event_name == 'release'
+        if: github.event_name == 'release'
         run: echo "KO_TAG=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_ENV
       - name: Run a ko build
         run: just build-release
