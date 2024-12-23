@@ -21,8 +21,8 @@ check-deps:
 
 # Build
 build: check-deps
-    ko build github.com/cofide/cofidectl-debug-container/cmd
+    ko build github.com/cofide/cofidectl-debug-container
 
 # Build application
 build-release: check-deps
-    ko build --bare --tags="$KO_TAG" github.com/cofide/cofidectl-debug-container/cmd
+    ko build --bare --tags="$KO_TAG" github.com/cofide/cofidectl-debug-container

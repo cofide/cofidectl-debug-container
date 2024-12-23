@@ -40,5 +40,5 @@ jobs:
       - name: Run a ko build
         run: just build-release
         env:
-          KO_DOCKER_REPO: ghcr.io/cofide/cofidectl-debug-container/cmd
+          KO_DOCKER_REPO: ghcr.io/cofide/cofidectl-debug-container
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
