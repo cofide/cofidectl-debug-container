@@ -45,21 +45,21 @@ Dtj+gY2rewoeJv5Pslli+SEObUslRaVtUMGxwUbmPU2fKuZHWBfe2FfA
 
 func Test_displayBundles(t *testing.T) {
 	tests := []struct {
-		name     string
-		bundles  *x509bundle.Set
-		expected []string
+		name    string
+		bundles *x509bundle.Set
+		want    []string
 	}{
 		{
 			name:    "nil bundles",
 			bundles: nil,
-			expected: []string{
+			want: []string{
 				"No trust bundles available",
 			},
 		},
 		{
 			name:    "empty bundles",
 			bundles: createEmptyBundleSet(t),
-			expected: []string{
+			want: []string{
 				"Trust bundles received",
 				"<none>",
 			},
@@ -67,7 +67,7 @@ func Test_displayBundles(t *testing.T) {
 		{
 			name:    "single bundle with no authorities",
 			bundles: createBundleSetWithoutAuthority(t),
-			expected: []string{
+			want: []string{
 				"Trust bundles received",
 				"* spiffe://domain.test",
 			},
@@ -75,7 +75,7 @@ func Test_displayBundles(t *testing.T) {
 		{
 			name:    "single bundle with one authority",
 			bundles: createBundleSetWithAuthority(t),
-			expected: []string{
+			want: []string{
 				"Trust bundles received",
 				"* spiffe://domain.test",
 				"  Certificate ",
@@ -94,8 +94,8 @@ func Test_displayBundles(t *testing.T) {
 				displayBundles(tt.bundles)
 			})
 
-			for _, expected := range tt.expected {
-				assert.Contains(t, output, expected)
+			for _, want := range tt.want {
+				assert.Contains(t, output, want)
 			}
 		})
 	}
@@ -106,14 +106,14 @@ func Test_displaySVIDs(t *testing.T) {
 	bundleSet := createBundleSetWithCert(t, svid.Certificates[0])
 
 	tests := []struct {
-		name     string
-		svids    []*x509svid.SVID
-		expected []string
+		name  string
+		svids []*x509svid.SVID
+		want  []string
 	}{
 		{
 			name:  "nil svids",
 			svids: nil,
-			expected: []string{
+			want: []string{
 				"SVIDs received",
 				"<none>",
 			},
@@ -121,7 +121,7 @@ func Test_displaySVIDs(t *testing.T) {
 		{
 			name:  "empty svids",
 			svids: []*x509svid.SVID{},
-			expected: []string{
+			want: []string{
 				"SVIDs received",
 				"<none>",
 			},
@@ -129,7 +129,7 @@ func Test_displaySVIDs(t *testing.T) {
 		{
 			name:  "single svid",
 			svids: []*x509svid.SVID{svid},
-			expected: []string{
+			want: []string{
 				"SVIDs received",
 				"* spiffe://domain.test/workload",
 				"Certificate",
@@ -147,8 +147,8 @@ func Test_displaySVIDs(t *testing.T) {
 				displaySVIDs(tt.svids, bundleSet)
 			})
 
-			for _, expected := range tt.expected {
-				assert.Contains(t, output, expected)
+			for _, want := range tt.want {
+				assert.Contains(t, output, want)
 			}
 		})
 	}
@@ -302,9 +302,9 @@ func Test_printCertInfo(t *testing.T) {
 				printCertInfo(tt.certs, tt.prefix)
 			})
 
-			for _, expected := range tt.contains {
-				if !strings.Contains(output, expected) {
-					t.Errorf("expected output to contain %q, got %q", expected, output)
+			for _, want := range tt.contains {
+				if !strings.Contains(output, want) {
+					t.Errorf("want output to contain %q, got %q", want, output)
 				}
 			}
 		})
