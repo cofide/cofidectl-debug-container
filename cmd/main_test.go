@@ -90,18 +90,9 @@ func Test_displayBundles(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			old := os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
-
-			displayBundles(tt.bundles)
-
-			w.Close()
-			os.Stdout = old
-
-			var buf bytes.Buffer
-			io.Copy(&buf, r)
-			output := buf.String()
+			output := captureOutput(t, func() {
+				displayBundles(tt.bundles)
+			})
 
 			for _, expected := range tt.expected {
 				assert.Contains(t, output, expected)
@@ -112,6 +103,7 @@ func Test_displayBundles(t *testing.T) {
 
 func Test_displaySVIDs(t *testing.T) {
 	svid := createTestSVID(t, "domain.test", "/workload")
+	bundleSet := createBundleSetWithCert(t, svid.Certificates[0])
 
 	tests := []struct {
 		name     string
@@ -144,6 +136,7 @@ func Test_displaySVIDs(t *testing.T) {
 				"Valid from",
 				"Subject: CN=test.domain.test",
 				"URIs: spiffe://domain.test/workload",
+				"SVID verified against trust bundle",
 			},
 		},
 	}
@@ -151,7 +144,7 @@ func Test_displaySVIDs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			output := captureOutput(t, func() {
-				displaySVIDs(tt.svids, createBundleSet(t))
+				displaySVIDs(tt.svids, bundleSet)
 			})
 
 			for _, expected := range tt.expected {
@@ -223,7 +216,7 @@ func Test_verifySVID(t *testing.T) {
 			svid:    svid,
 			bundles: createEmptyBundleSet(t),
 			wantErr: true,
-			want:    fmt.Sprintf("failed to get bundle for trust domain \"spiffe://domain.test\": x509bundle: no X.509 bundle for trust domain \"domain.test\""),
+			want:    fmt.Sprintf("failed to get bundle for trust domain \"%s\": x509bundle: no X.509 bundle for trust domain \"%s\"", svid.ID.TrustDomain().IDString(), svid.ID.TrustDomain().String()),
 		},
 		{
 			name:    "nil bundle set",
@@ -305,18 +298,9 @@ func Test_printCertInfo(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			old := os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
-
-			printCertInfo(tt.certs, tt.prefix)
-
-			w.Close()
-			os.Stdout = old
-
-			var buf bytes.Buffer
-			io.Copy(&buf, r)
-			output := buf.String()
+			output := captureOutput(t, func() {
+				printCertInfo(tt.certs, tt.prefix)
+			})
 
 			for _, expected := range tt.contains {
 				if !strings.Contains(output, expected) {
@@ -483,7 +467,11 @@ func captureOutput(t *testing.T, fn func()) string {
 	os.Stdout = old
 
 	var buf bytes.Buffer
-	io.Copy(&buf, r)
+	_, err := io.Copy(&buf, r)
+	if err != nil {
+		t.Fatalf("Failed to copy output: %v", err)
+	}
+
 	return buf.String()
 }
 

@@ -86,7 +86,7 @@ func displaySVIDs(svids []*x509svid.SVID, bundles *x509bundle.Set) {
 		if err := verifySVID(s, bundles); err != nil {
 			fmt.Printf("    Verification failed: %v\n", err)
 		} else {
-			fmt.Printf("    SVID successfully verified against trust bundle\n")
+			fmt.Printf("    SVID verified against trust bundle\n")
 		}
 	}
 }
