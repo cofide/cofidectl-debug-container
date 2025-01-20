@@ -118,6 +118,7 @@ func printCertInfo(certs []*x509.Certificate, prefix string) {
 	}
 }
 
+// fingerprintCert returns the SHA-256 fingerprint of the certificate
 func fingerprintCert(cert *x509.Certificate) string {
 	if cert == nil {
 		return ""
