@@ -90,13 +90,21 @@ func main() {
 	}
 }
 
+// printCertInfo prints information about a list of certificates
 func printCertInfo(certs []*x509.Certificate, prefix string) {
 	for i, c := range certs {
+		if c == nil {
+			fmt.Printf("%sError: nil certificate\n", prefix)
+			continue
+		}
+
 		fmt.Printf("%sCertificate %q\n", prefix, fingerprintCert(c))
 		if c.IsCA {
 			fmt.Printf("%sis a CA certificate\n", prefix)
 		}
-		fmt.Printf("%svalid from %q to %q\n", prefix, c.NotBefore.Format(time.RFC3339), c.NotAfter.Format(time.RFC3339))
+
+		fmt.Printf("%sValid from %q to %q\n", prefix, c.NotBefore.Format(time.RFC3339), c.NotAfter.Format(time.RFC3339))
+
 		if c.Subject.String() != "" {
 			fmt.Printf("%sSubject: %s\n", prefix, c.Subject.String())
 		}
@@ -106,10 +114,10 @@ func printCertInfo(certs []*x509.Certificate, prefix string) {
 			for _, uri := range c.URIs {
 				uris = append(uris, uri.String())
 			}
-			fmt.Printf("%sDNS names: %s\n", prefix, strings.Join(uris, ", "))
+			fmt.Printf("%sURIs: %s\n", prefix, strings.Join(uris, ", "))
 		}
 
-		fmt.Printf("%sSignature algorithm: %s\n", prefix, c.SignatureAlgorithm)
+		fmt.Printf("%sSignature algorithm: %s\n", prefix, c.SignatureAlgorithm.String())
 		fmt.Printf("%sIssuer: %s\n", prefix, c.Issuer.String())
 
 		if i < len(certs)-1 {

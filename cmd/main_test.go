@@ -4,8 +4,18 @@
 package main
 
 import (
+	"bytes"
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/x509"
+	"crypto/x509/pkix"
+	"io"
+	"math/big"
+	"net/url"
+	"os"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/cert-manager/cert-manager/pkg/util/pki"
 )
@@ -59,6 +69,86 @@ func Test_fingerprintCert(t *testing.T) {
 	}
 }
 
+func Test_printCertInfo(t *testing.T) {
+	template := &x509.Certificate{
+		Subject: pkix.Name{
+			CommonName: "cofide.io",
+		},
+		Issuer: pkix.Name{
+			CommonName: "cofide.io",
+		},
+		SerialNumber:          big.NewInt(1),
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().Add(24 * time.Hour),
+		IsCA:                  true,
+		BasicConstraintsValid: true,
+		KeyUsage:              x509.KeyUsageCertSign,
+		SignatureAlgorithm:    x509.SHA256WithRSA,
+		URIs:                  []*url.URL{parseURL("spiffe://cofide.io/test")},
+	}
+
+	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
+	certDER, _ := x509.CreateCertificate(rand.Reader, template, template, &privateKey.PublicKey, privateKey)
+	cert, _ := x509.ParseCertificate(certDER)
+
+	tests := []struct {
+		name     string
+		certs    []*x509.Certificate
+		prefix   string
+		contains []string
+	}{
+		{
+			name:   "single CA certificate",
+			certs:  []*x509.Certificate{cert},
+			prefix: "  ",
+			contains: []string{
+				`  Certificate "`,
+				"  Valid from",
+				"  Subject: CN=cofide.io",
+				"  URIs: spiffe://cofide.io/test",
+				"  Signature algorithm: SHA256-RSA",
+				"  Issuer: CN=cofide.io",
+			},
+		},
+		{
+			name:   "empty certificate list",
+			certs:  []*x509.Certificate{},
+			prefix: "  ",
+		},
+		{
+			name:   "empty certificate list",
+			certs:  []*x509.Certificate{nil},
+			prefix: "  ",
+			contains: []string{
+				"  Error: nil certificate",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			old := os.Stdout
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+
+			printCertInfo(tt.certs, tt.prefix)
+
+			w.Close()
+			os.Stdout = old
+
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			output := buf.String()
+
+			for _, expected := range tt.contains {
+				if !strings.Contains(output, expected) {
+					t.Errorf("expected output to contain %q, got %q", expected, output)
+				}
+			}
+		})
+	}
+}
+
 func parseCert(t *testing.T, certData string) *x509.Certificate {
 	x509Cert, err := pki.DecodeX509CertificateBytes([]byte(certData))
 	if err != nil {
@@ -68,3 +158,7 @@ func parseCert(t *testing.T, certData string) *x509.Certificate {
 	return x509Cert
 }
 
+func parseURL(s string) *url.URL {
+	u, _ := url.Parse(s)
+	return u
+}
