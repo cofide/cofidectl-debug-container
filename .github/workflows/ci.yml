@@ -23,7 +23,7 @@ jobs:
           args: --timeout=5m
 
   build-test:
-    name: build
+    name: build-test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -45,5 +45,7 @@ jobs:
       - name: Install dependencies
         run: |
           go mod download
-      - name: Run a test build
+      - name: Build
         run: just build
+      - name: Test
+        run: just test
