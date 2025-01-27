@@ -1,13 +1,15 @@
-name: docker-image
+name: release
 on:
   push:
     branches:
       - main
   release:
+    types:
+      - published
     
 jobs:
-  build-test:
-    name: build
+  build-release:
+    name: build-release
     permissions:
       contents: read
       packages: write
