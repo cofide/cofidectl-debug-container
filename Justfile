@@ -25,7 +25,7 @@ build: check-deps
 
 # Build application
 build-release: check-deps
-    ko build --bare --tags="$KO_TAG" github.com/cofide/cofidectl-debug-container/cmd
+    ko build --bare --platform=linux/amd64,linux/arm64 --tags="$KO_TAG" github.com/cofide/cofidectl-debug-container/cmd
 
 test:
     go run gotest.tools/gotestsum@latest --format github-actions ./...
