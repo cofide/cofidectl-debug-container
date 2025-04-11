@@ -2,6 +2,8 @@ module github.com/cofide/cofidectl-debug-container
 
 go 1.23.1
 
+toolchain go1.23.6
+
 require (
 	github.com/cert-manager/cert-manager v1.16.3
 	github.com/spiffe/go-spiffe/v2 v2.4.0
