@@ -47,7 +47,9 @@ func main() {
 	}
 
 	// closing client before end of run so we have a clean output
-	client.Close()
+	if err := client.Close(); err != nil {
+		slog.Warn("Failed to close SPIFFE client", "error", err)
+	}
 
 	displayBundles(bundles)
 	displaySVIDs(svids, bundles)

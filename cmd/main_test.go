@@ -23,6 +23,7 @@ import (
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
 	"github.com/spiffe/go-spiffe/v2/svid/x509svid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const testCert = `-----BEGIN CERTIFICATE-----
@@ -463,11 +464,13 @@ func captureOutput(t *testing.T, fn func()) string {
 
 	fn()
 
-	w.Close()
+	err := w.Close()
+	require.NoError(t, err)
+
 	os.Stdout = old
 
 	var buf bytes.Buffer
-	_, err := io.Copy(&buf, r)
+	_, err = io.Copy(&buf, r)
 	if err != nil {
 		t.Fatalf("Failed to copy output: %v", err)
 	}
