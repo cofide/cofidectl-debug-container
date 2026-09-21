@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"os"
 	"strings"
 	"time"
 
@@ -21,16 +22,23 @@ import (
 )
 
 const (
-	apiTimeout   = 5 * time.Second
-	spiffeSocket = "unix:///spiffe-workload-api/spire-agent.sock"
-	timeFormat   = time.RFC3339
+	apiTimeout          = 5 * time.Second
+	defaultSpiffeSocket = "unix:///spiffe-workload-api/spire-agent.sock"
+	timeFormat          = time.RFC3339
 )
 
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), apiTimeout)
 	defer cancel()
 
-	client, err := workloadapi.New(ctx, workloadapi.WithAddr(spiffeSocket), workloadapi.WithLogger(logger.Std))
+	// Get socket path from environment variable, with a fallback to the default.
+	// SPIFFE_ENDPOINT_SOCKET is the standard environment variable for this.
+	socketPath := os.Getenv("SPIFFE_ENDPOINT_SOCKET")
+	if socketPath == "" {
+		socketPath = defaultSpiffeSocket
+	}
+
+	client, err := workloadapi.New(ctx, workloadapi.WithAddr(socketPath), workloadapi.WithLogger(logger.Std))
 
 	if err != nil {
 		log.Fatalf("Unable to create workload API client: %v", err)
